@@ -64,27 +64,32 @@ if __name__ == '__main__':
         if len(data_input) < 2:
             continue
 
-        # align image
-        # set numpy landmarks
-        landmarks_string = json.loads(data_input)
-        landmarks = np.array(landmarks_string)
+        try:
+            # align image
+            # set numpy landmarks
+            landmarks_string = json.loads(data_input)
+            landmarks = np.array(landmarks_string)
 
-        A_paths = os.path.join(input_path, img_name)
-        img = Image.open(A_paths).convert('RGB')
-        img_width, img_height = img.size
+            A_paths = os.path.join(input_path, img_name)
+            img = Image.open(A_paths).convert('RGB')
+            img_width, img_height = img.size
 
-        # crop
-        source = landmark_68_to_5(landmarks)
-        tform = trans.SimilarityTransform()                                                                                                                                                  
-        tform.estimate(source, reference)
-        M = tform.params[0:2,:]
-        array_img = np.array(img)
-        crop_img = cv2.warpAffine(array_img, M, out_size)
+            # crop
+            source = landmark_68_to_5(landmarks)
+            tform = trans.SimilarityTransform()                                                                                                                                                  
+            tform.estimate(source, reference)
+            M = tform.params[0:2,:]
+            array_img = np.array(img)
+            crop_img = cv2.warpAffine(array_img, M, out_size)
 
-        # enhance
-        hq_faces, lq_parse_maps = enhance_faces([crop_img], enhance_model)
+            # enhance
+            hq_faces, lq_parse_maps = enhance_faces([crop_img], enhance_model)
 
-        image_numpy = cv2.warpAffine(hq_faces[0], M, img.size, array_img, flags=cv2.WARP_INVERSE_MAP | cv2.INTER_CUBIC )
+            image_numpy = cv2.warpAffine(hq_faces[0], M, img.size, array_img, flags=cv2.WARP_INVERSE_MAP | cv2.INTER_CUBIC )
 
-        image_pil = Image.fromarray(image_numpy)
-        image_pil.save(os.path.join(output_path, img_name))
+            image_pil = Image.fromarray(image_numpy)
+            image_pil.save(os.path.join(output_path, img_name))
+        except Exception as e:
+            print(r'%ERROR%$Error in enhancing this image: {}'.format(str(e)))
+
+            continue
