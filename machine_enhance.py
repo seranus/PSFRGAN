@@ -16,7 +16,7 @@ from pathlib import Path
 def enhance_faces(LQ_faces, model):
     hq_faces = []
     lq_parse_maps = []
-    for lq_face in tqdm(LQ_faces):
+    for lq_face in LQ_faces:
         with torch.no_grad():
             lq_tensor = torch.tensor(lq_face.transpose(2, 0, 1)) / 255. * 2 - 1
             lq_tensor = lq_tensor.unsqueeze(0).float().to(model.device)
